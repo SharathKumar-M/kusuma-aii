@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Voice Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <h3>History</h3>
+    <ul id="historyList"></ul>
+  </aside>
+
+  <!-- App -->
+  <div class="app">
+
+    <header>
+      <span>AI Calculator</span>
+      <div class="header-actions">
+        <button onclick="toggleVoice()">🔊</button>
+        <button onclick="toggleSidebar()">☰</button>
+      </div>
+    </header>
+
+    <main id="chatBox"></main>
+
+    <footer class="chat-input">
+  <div class="input-bar">
+    <button id="micBtn" class="icon mic" type="button">🎤</button>
+
+    <input
+      id="userInput"
+      type="text"
+      placeholder="Ask anything"
+      autocomplete="off"
+    />
+
+    <button id="sendBtn" class="icon send" type="button">➤</button>
+  </div>
+</footer>
+
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
