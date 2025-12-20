@@ -100,36 +100,57 @@ sendBtn.addEventListener("click", () => {
  ***********************/
 function calculateWithSteps(inputText) {
   try {
-    let expr = inputText.toLowerCase()
+    let text = inputText.toLowerCase();
+
+    // Percentage
+    if (text.includes("percent of")) {
+      const [p, n] = text.match(/\d+/g);
+      const result = (p / 100) * n;
+      return {
+        answer: `Answer: ${result}`,
+        steps: `${p}% of ${n} = (${p}/100) × ${n}`
+      };
+    }
+
+    // Square
+    if (text.includes("square of")) {
+      const n = Number(text.match(/\d+/)[0]);
+      return {
+        answer: `Answer: ${n ** 2}`,
+        steps: `${n} × ${n}`
+      };
+    }
+
+    // Cube root
+    if (text.includes("cube root of")) {
+      const n = Number(text.match(/\d+/)[0]);
+      return {
+        answer: `Answer: ${Math.cbrt(n)}`,
+        steps: `Cube root of ${n}`
+      };
+    }
+
+    // Fallback (your existing logic)
+    let expr = text
       .replace("plus", "+")
       .replace("minus", "-")
       .replace("times", "*")
       .replace("multiply", "*")
       .replace("divide", "/")
-      .replace("by", "")
-      .replace("power", "**");
-
-    if (expr.includes("square root")) {
-      const num = Number(expr.replace("square root of", ""));
-      return {
-        answer: `Answer: ${Math.sqrt(num)}`,
-        steps: `Square root of ${num}`
-      };
-    }
+      .replace("by", "");
 
     const result = eval(expr);
 
     return {
       answer: `Answer: ${result}`,
-      steps: `Evaluated expression: ${expr}`
+      steps: `Evaluated: ${expr}`
     };
+
   } catch {
-    return {
-      answer: "I couldn't understand that.",
-      steps: null
-    };
+    return { answer: "I couldn't understand that.", steps: null };
   }
 }
+
 
 /***********************
  * SIDEBAR HISTORY
