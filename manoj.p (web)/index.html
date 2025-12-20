@@ -10,14 +10,21 @@
 <div class="layout">
 
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <h3>History</h3>
     <ul id="historyList"></ul>
   </aside>
 
-  <!-- Chat App -->
+  <!-- App -->
   <div class="app">
-    <header>AI Calculator</header>
+
+    <header>
+      <span>AI Calculator</span>
+      <div class="header-actions">
+        <button onclick="toggleVoice()">🔊</button>
+        <button onclick="toggleSidebar()">☰</button>
+      </div>
+    </header>
 
     <main id="chatBox"></main>
 
@@ -26,8 +33,8 @@
       <input id="userInput" placeholder="Ask a math question…" />
       <button onclick="sendMessage()">➤</button>
     </footer>
-  </div>
 
+  </div>
 </div>
 
 <script src="script.js"></script>
