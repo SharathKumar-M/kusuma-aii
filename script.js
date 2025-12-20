@@ -5,10 +5,17 @@ const chatBox = document.getElementById("chatBox");
 const input = document.getElementById("userInput");
 const historyList = document.getElementById("historyList");
 const sidebar = document.getElementById("sidebar");
+const sendBtn = document.getElementById("sendBtn");
+
 
 let voiceEnabled = true;
 let conversations = JSON.parse(localStorage.getItem("conversations")) || [];
-let currentChat = [];
+let currentChat = {
+  id: Date.now(),
+  title: "New chat",
+  messages: []
+};
+
 
 /***********************
  * INITIAL LOAD
@@ -33,10 +40,19 @@ function addMessage(text, sender, steps = null, save = true) {
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
 
-  if (save) currentChat.push({ text, sender, steps });
+  if (save) {
+    currentChat.messages.push({ text, sender, steps });
+
+    // Set title from first user message
+    if (sender === "user" && currentChat.title === "New chat") {
+      currentChat.title = text.slice(0, 30);
+      updateHistory();
+    }
+  }
 
   if (sender === "bot" && voiceEnabled) speak(text);
 }
+
 
 function showThinking() {
   const div = document.createElement("div");
@@ -66,11 +82,18 @@ function sendMessage(textFromVoice = null) {
 
   setTimeout(() => {
     removeThinking();
+
     const result = calculateWithSteps(text);
+
     addMessage(result.answer, "bot", result.steps);
     saveConversation();
   }, 600);
 }
+
+sendBtn.addEventListener("click", () => {
+  sendMessage();
+});
+
 
 /***********************
  * AI CALCULATION
@@ -112,30 +135,88 @@ function calculateWithSteps(inputText) {
  * SIDEBAR HISTORY
  ***********************/
 function saveConversation() {
-  if (!conversations.includes(currentChat)) {
-    conversations.push(currentChat);
+  const index = conversations.findIndex(c => c.id === currentChat.id);
+
+  if (index === -1) {
+    conversations.unshift(currentChat); // newest on top
+  } else {
+    conversations[index] = currentChat;
   }
+
   localStorage.setItem("conversations", JSON.stringify(conversations));
   renderSidebar();
 }
 
+
 function renderSidebar() {
   historyList.innerHTML = "";
-  conversations.forEach((conv, index) => {
+
+  conversations.forEach(chat => {
     const li = document.createElement("li");
-    li.innerText = conv[0]?.text || "Conversation";
-    li.onclick = () => loadConversation(index);
+    li.className = "history-item";
+
+    if (chat.id === currentChat.id) {
+      li.classList.add("active");
+    }
+
+    const title = document.createElement("span");
+    title.innerText = chat.title;
+    title.onclick = () => loadConversation(chat.id);
+
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "🗑";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = (e) => {
+      e.stopPropagation(); // prevent loading chat
+      deleteConversation(chat.id);
+    };
+
+    li.appendChild(title);
+    li.appendChild(delBtn);
     historyList.appendChild(li);
   });
 }
 
-function loadConversation(index) {
+
+
+function loadConversation(id) {
+  const chat = conversations.find(c => c.id === id);
+  if (!chat) return;
+
   chatBox.innerHTML = "";
-  currentChat = conversations[index];
-  currentChat.forEach(m =>
+  currentChat = chat;
+
+  chat.messages.forEach(m =>
     addMessage(m.text, m.sender, m.steps, false)
   );
+
+  renderSidebar();
 }
+
+function newChat() {
+  currentChat = {
+    id: Date.now(),
+    title: "New chat",
+    messages: []
+  };
+
+  chatBox.innerHTML = "";
+  renderSidebar();
+}
+
+function deleteConversation(id) {
+  if (!confirm("Delete this conversation?")) return;
+
+  conversations = conversations.filter(chat => chat.id !== id);
+
+  if (currentChat.id === id) {
+    newChat();
+  }
+
+  localStorage.setItem("conversations", JSON.stringify(conversations));
+  renderSidebar();
+}
+
 
 /***********************
  * VOICE INPUT (MIC)
