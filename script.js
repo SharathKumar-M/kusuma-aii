@@ -100,54 +100,85 @@ sendBtn.addEventListener("click", () => {
  ***********************/
 function calculateWithSteps(inputText) {
   try {
-    let text = inputText.toLowerCase();
+    const text = inputText.toLowerCase().trim();
+    const numbers = text.match(/\d+(\.\d+)?/g)?.map(Number);
 
-    // Percentage
-    if (text.includes("percent of")) {
-      const [p, n] = text.match(/\d+/g);
-      const result = (p / 100) * n;
+    if (!numbers || numbers.length === 0) {
+      return { answer: "Please enter a valid math problem.", steps: null };
+    }
+
+    /* ---------- PERCENTAGE ---------- */
+    if (text.includes("percent")) {
+      const [a, b] = numbers;
+      const result = (a / 100) * b;
       return {
         answer: `Answer: ${result}`,
-        steps: `${p}% of ${n} = (${p}/100) × ${n}`
+        steps: `Step 1: ${a}% = ${a}/100\nStep 2: (${a}/100) × ${b}`
       };
     }
 
-    // Square
+    /* ---------- SQUARE ---------- */
     if (text.includes("square of")) {
-      const n = Number(text.match(/\d+/)[0]);
+      const n = numbers[0];
       return {
-        answer: `Answer: ${n ** 2}`,
+        answer: `Answer: ${n * n}`,
         steps: `${n} × ${n}`
       };
     }
 
-    // Cube root
-    if (text.includes("cube root of")) {
-      const n = Number(text.match(/\d+/)[0]);
+    /* ---------- SQUARE ROOT ---------- */
+    if (text.includes("square root")) {
+      const n = numbers[0];
       return {
-        answer: `Answer: ${Math.cbrt(n)}`,
-        steps: `Cube root of ${n}`
+        answer: `Answer: ${Math.sqrt(n)}`,
+        steps: `Square root of ${n}`
       };
     }
 
-    // Fallback (your existing logic)
-    let expr = text
-      .replace("plus", "+")
-      .replace("minus", "-")
-      .replace("times", "*")
-      .replace("multiply", "*")
-      .replace("divide", "/")
-      .replace("by", "");
+    /* ---------- ADDITION ---------- */
+    if (text.includes("add") || text.includes("+")) {
+      const result = numbers.reduce((a, b) => a + b);
+      return {
+        answer: `Answer: ${result}`,
+        steps: numbers.join(" + ")
+      };
+    }
 
-    const result = eval(expr);
+    /* ---------- SUBTRACTION ---------- */
+    if (text.includes("subtract") || text.includes("-")) {
+      const result = numbers.reduce((a, b) => a - b);
+      return {
+        answer: `Answer: ${result}`,
+        steps: numbers.join(" - ")
+      };
+    }
 
+    /* ---------- MULTIPLICATION ---------- */
+    if (text.includes("multiply") || text.includes("*")) {
+      const result = numbers.reduce((a, b) => a * b);
+      return {
+        answer: `Answer: ${result}`,
+        steps: numbers.join(" × ")
+      };
+    }
+
+    /* ---------- DIVISION ---------- */
+    if (text.includes("divide") || text.includes("/")) {
+      const result = numbers.reduce((a, b) => a / b);
+      return {
+        answer: `Answer: ${result}`,
+        steps: numbers.join(" ÷ ")
+      };
+    }
+
+    /* ---------- FALLBACK ---------- */
     return {
-      answer: `Answer: ${result}`,
-      steps: `Evaluated: ${expr}`
+      answer: "I understood the text, but not the math type yet.",
+      steps: "Try rephrasing the question."
     };
 
   } catch {
-    return { answer: "I couldn't understand that.", steps: null };
+    return { answer: "Something went wrong.", steps: null };
   }
 }
 
